@@ -1,0 +1,26 @@
+{
+  "name": "cachetree-redis",
+  "description": "Redis storage backend for Cachetree",
+  "version": "1.0.0",
+  "author": "David Wood <bitprobe@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/davidwood/cachetree-redis.git"
+  },
+  "keywords": ["cache", "tree", "cachetree", "redis"],
+  "dependencies": {
+    "redis": "0.8.x"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "fakeredis": "0.0.x"
+  },
+  "scripts": {
+    "test": "make test"
+  },
+  "main": "./index.js",
+  "engines": {
+    "node": ">= 0.8.0"
+  }
+}
+
