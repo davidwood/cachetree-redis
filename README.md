@@ -27,7 +27,8 @@ The `cachetree-redis` module exports a single constructor function that accepts 
     * `host`: Redis server host
     * `options`: [Redis client](https://github.com/mranney/node_redis) options passed to `redis.createClient`
     * `pw`: Password for authenticating with Redis
-    * `pw`: Alias for `pw`, if you're not a fan of the whole brevity thing
+    * `pass`: Alias for `pw`, if you're not a fan of the whole brevity thing
+    * `password`: Alias for `pw`, same as `pass`
     * `db`: Number of the database to select
     * `database`: Alias for `db`
     * `delimiter`: Redis key delimiter, defaults to `:`
