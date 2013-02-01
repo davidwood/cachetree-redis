@@ -32,6 +32,7 @@ The `cachetree-redis` module exports a single constructor function that accepts 
     * `db`: Number of the database to select
     * `database`: Alias for `db`
     * `delimiter`: Redis key delimiter, defaults to `:`
+    * `autoCast`: Automatically stringify and parse values, defaults to `true` 
 
 The returned store exposes the underlying Redis client through a property named `client`.
 

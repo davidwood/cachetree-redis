@@ -1,5 +1,6 @@
 /*global describe: true, it:true, beforeEach: true, afterEach: true, before: true, after: true */
 var assert      = require('assert'),
+    Buffer      = require('buffer').Buffer,
     fakeredis   = require('fakeredis'),
     client      = fakeredis.createClient(),
     RedisStore  = require('../');
@@ -33,7 +34,8 @@ describe('RedisStore', function() {
       alpha: 'dot dash',
       bravo: 'dash dot dot dot',
       charlie: 'dash dot dash dot',
-      delta: 'dash dot dot'
+      delta: 'dash dot dot',
+      xray: '13'
     }
   },
   data2 = {
@@ -131,6 +133,17 @@ describe('RedisStore', function() {
         assert.ok(!err);
         assert.notStrictEqual(values, data.icao);
         assert.deepEqual(values, data.icao);
+        assert.equal(typeof values.xray, 'number');
+        assert.strictEqual(values.xray, 13);
+        done();
+      });
+    });
+
+    it('should return numeric values as a number', function(done) {
+      store.get('icao', 'xray', function(err, value) {
+        assert.ok(!err);
+        assert.equal(typeof value, 'number');
+        assert.strictEqual(value, 13);
         done();
       });
     });
@@ -199,10 +212,10 @@ describe('RedisStore', function() {
     });
 
     it('should accept an object of field and values', function(done) {
-      store.set('icao', { alpha: 'dot dash', bravo: 'dash dot dot dot', charlie: 'dash dot dash dot' }, function(err) {
+      store.set('icao', { alpha: 'dot dash', bravo: 'dash dot dot dot', charlie: 'dash dot dash dot', xray: 13 }, function(err) {
         assert.ok(!err);
         store.client.hgetall('icao', function(err, data) {
-          assert.deepEqual(data, { alpha: 'dot dash', bravo: 'dash dot dot dot', charlie: 'dash dot dash dot' });
+          assert.deepEqual(data, { alpha: 'dot dash', bravo: 'dash dot dot dot', charlie: 'dash dot dash dot', xray: '13' });
           done();
         });
       });
@@ -353,7 +366,7 @@ describe('RedisStore', function() {
       store.del('icao', 'alpha', function(err) {
         assert.ok(!err);
         store.client.hgetall('icao', function(err, data) {
-          assert.deepEqual(data, { bravo: 'dash dot dot dot', charlie: 'dash dot dash dot', delta: 'dash dot dot' });
+          assert.deepEqual(data, { bravo: 'dash dot dot dot', charlie: 'dash dot dash dot', delta: 'dash dot dot', xray: '13' });
           done();
         });
       });
@@ -363,7 +376,7 @@ describe('RedisStore', function() {
       store.del(['icao'], 'alpha', function(err) {
         assert.ok(!err);
         store.client.hgetall('icao', function(err, data) {
-          assert.deepEqual(data, { bravo: 'dash dot dot dot', charlie: 'dash dot dash dot', delta: 'dash dot dot' });
+          assert.deepEqual(data, { bravo: 'dash dot dot dot', charlie: 'dash dot dash dot', delta: 'dash dot dot', xray: '13' });
           done();
         });
       });
@@ -373,7 +386,7 @@ describe('RedisStore', function() {
       store.del('icao', 'alpha', 'charlie', 'echo', function(err) {
         assert.ok(!err);
         store.client.hgetall('icao', function(err, data) {
-          assert.deepEqual(data, { bravo: 'dash dot dot dot', delta: 'dash dot dot' });
+          assert.deepEqual(data, { bravo: 'dash dot dot dot', delta: 'dash dot dot', xray: '13' });
           done();
         });
       });
@@ -383,12 +396,12 @@ describe('RedisStore', function() {
       store.del('icao', ['alpha', 'charlie', 'alpha'], function(err) {
         assert.ok(!err);
         store.client.hgetall('icao', function(err, data) {
-          assert.deepEqual(data, { bravo: 'dash dot dot dot', delta: 'dash dot dot' });
+          assert.deepEqual(data, { bravo: 'dash dot dot dot', delta: 'dash dot dot', xray: '13' });
           done();
         });
       });
     });
-
+    
   });
 
   describe('.flush(key, cb)', function() {
@@ -479,6 +492,46 @@ describe('RedisStore', function() {
     it('should return the value if a string or number', function() {
       assert.equal(store.cacheKey(['alpha', 'bravo']), 'alpha:bravo');
       assert.equal(store.cacheKey(1234), 1234);
+    });
+
+  });
+
+  describe('._parse(value)', function() {
+
+    it('should not parse the value if the autoCast property is false', function() {
+      var inst = new RedisStore({ client: store.client, autoCast: false });
+      assert.strictEqual(inst._parse('1234'), '1234');
+    });
+
+    it('should not parse the value if a buffer', function() {
+      var inst = new RedisStore({ client: store.client }),
+          buffer = new Buffer(100);
+      assert.strictEqual(inst._parse(buffer), buffer);
+    });
+
+    it('should parse string values', function() {
+      var inst = new RedisStore({ client: store.client });
+      assert.strictEqual(inst._parse('1234'), 1234);
+    });
+
+  });
+
+  describe('._stringify(value)', function() {
+    
+    it('should not stringify the value if the autoCast property is false', function() {
+      var inst = new RedisStore({ client: store.client, autoCast: false });
+      assert.strictEqual(inst._stringify(1234), 1234);
+    });
+
+    it('should not stringify the value if a buffer', function() {
+      var inst = new RedisStore({ client: store.client }),
+          buffer = new Buffer(100);
+      assert.strictEqual(inst._stringify(buffer), buffer);
+    });
+
+    it('should stringify string values', function() {
+      var inst = new RedisStore({ client: store.client });
+      assert.strictEqual(inst._stringify(1234), '1234');
     });
 
   });
