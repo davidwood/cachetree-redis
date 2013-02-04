@@ -1,7 +1,7 @@
 {
   "name": "cachetree-redis",
   "description": "Redis storage backend for Cachetree",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "author": "David Wood <bitprobe@gmail.com>",
   "repository": {
     "type": "git",
