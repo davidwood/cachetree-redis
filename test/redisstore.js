@@ -496,6 +496,58 @@ describe('RedisStore', function() {
 
   });
 
+  describe('.fields(key, cb)', function() {
+
+    before(function(done) {
+      store.client.hmset('icao', data.icao, function() {
+        done();
+      });
+    });
+
+    after(function(done) {
+      clear(store, done);
+    });
+
+    it('should return self for chaining', function() {
+      assert.strictEqual(store.fields(), store);
+    });
+
+    it('should return an error if the key is not defined', function(done) {
+      store.fields(function(err) {
+        assert.ok(err instanceof Error);
+        assert.equal(err.message, 'Invalid key');
+        done();
+      });
+    });
+
+    it('should accept an array for the key', function(done) {
+      store.fields(['icao'], function(err, fields) {
+        assert.ok(!err);
+        assert.ok(Array.isArray(fields));
+        assert.deepEqual(fields, ['alpha', 'bravo', 'charlie', 'delta', 'xray']);
+        done();
+      });
+    });
+
+    it('should return an array of fields keys', function(done) {
+      store.fields('icao', function(err, fields) {
+        assert.ok(!err);
+        assert.ok(Array.isArray(fields));
+        assert.deepEqual(fields, ['alpha', 'bravo', 'charlie', 'delta', 'xray']);
+        done();
+      });
+    });
+
+    it('should return any empty array if no fields exist', function(done) {
+      store.fields('itu', function(err, fields) {
+        assert.ok(!err);
+        assert.ok(Array.isArray(fields));
+        assert.equal(fields.length, 0);
+        done();
+      });
+    });
+
+  });
   describe('._parse(value)', function() {
 
     it('should not parse the value if the autoCast property is false', function() {
