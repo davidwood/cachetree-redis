@@ -18,10 +18,11 @@
   },
   "devDependencies": {
     "fakeredis": "0.0.x",
-    "mocha": "*"
+    "istanbul": "^0.3.6",
+    "mocha": "^2.1.0"
   },
   "scripts": {
-    "test": "make test"
+    "test": "NODE_ENV=test istanbul test _mocha -- --check-leaks --reporter spec"
   },
   "main": "./index.js",
   "engines": {
