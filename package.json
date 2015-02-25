@@ -7,20 +7,25 @@
     "type": "git",
     "url": "http://github.com/davidwood/cachetree-redis.git"
   },
-  "keywords": ["cache", "tree", "cachetree", "redis"],
+  "keywords": [
+    "cache",
+    "tree",
+    "cachetree",
+    "redis"
+  ],
   "dependencies": {
-    "redis": "0.8.x"
+    "redis": "^0.12.1"
   },
   "devDependencies": {
-    "mocha": "*",
-    "fakeredis": "0.0.x"
+    "fakeredis": "^0.3.0",
+    "istanbul": "^0.3.6",
+    "mocha": "^2.1.0"
   },
   "scripts": {
-    "test": "make test"
+    "test": "NODE_ENV=test istanbul test _mocha -- --check-leaks --reporter spec"
   },
   "main": "./index.js",
   "engines": {
     "node": ">= 0.8.0"
   }
 }
-
