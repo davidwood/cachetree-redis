@@ -7,7 +7,8 @@ var assert = require('assert'),
 
 describe('RedisStore', function() {
 
-  var store;
+  var store,
+      inst;
   before(function() {
     var options;
     try {
@@ -17,6 +18,13 @@ describe('RedisStore', function() {
     store = new RedisStore(options || { client: client });
   });
   
+  afterEach(function() {
+    if (inst) {
+      inst.client.removeAllListeners();
+      inst = null;
+    }
+  });
+
   function clear(store, cb) {
     store.client.keys('*', function(err, keys) {
       if (Array.isArray(keys)) {
@@ -60,17 +68,17 @@ describe('RedisStore', function() {
   describe('new RedisStore(options)', function() {
 
     it('should not require new to be constructed', function() {
-      var inst = RedisStore({ client: store.client });
+      inst = RedisStore({ client: store.client });
       assert.strictEqual(inst instanceof RedisStore, true);
     });
 
     it('should accept a custom delimiter', function() {
-      var inst = new RedisStore({ client: store.client, delimiter: '-' });
+      inst = new RedisStore({ client: store.client, delimiter: '-' });
       assert.strictEqual(inst.delimiter, '-');
     });
 
     it('should be an EventEmitter', function(done) {
-      var inst = new RedisStore({ client: store.client });
+      inst = new RedisStore({ client: store.client });
       assert.strictEqual(inst instanceof EventEmitter, true);
       inst.on('test', done);
       inst.emit('test');
@@ -161,6 +169,26 @@ describe('RedisStore', function() {
         assert.strictEqual(typeof value, 'number');
         assert.strictEqual(value, 13);
         done();
+      });
+    });
+
+    it('should emit an error event', function(done) {
+      this.timeout(10000);
+      var complete = 0;
+      inst = new RedisStore({ host: 'bad.local', port: 6379, options: { connect_timeout: 250, max_attempts: 1 } });
+      inst.on('error', function(err) {
+        assert.strictEqual(err instanceof Error, true);
+        assert.strictEqual(err.message, 'Redis connection to bad.local:6379 failed - getaddrinfo ENOTFOUND');
+        if (++complete === 2) {
+          done();
+        }
+      });
+      inst.get('test', function(err) {
+        assert.strictEqual(err instanceof Error, true);
+        assert.strictEqual(err.message, 'Redis connection to bad.local:6379 failed - getaddrinfo ENOTFOUND');
+        if (++complete === 2) {
+          done();
+        }
       });
     });
 
@@ -510,7 +538,7 @@ describe('RedisStore', function() {
     
     it('should return an array concatenated with delimiter', function() {
       assert.strictEqual(store.cacheKey(['alpha', 'bravo']), 'alpha:bravo');
-      var inst = new RedisStore({ client: store.client, delimiter: '-' });
+      inst = new RedisStore({ client: store.client, delimiter: '-' });
       assert.strictEqual(inst.cacheKey(['alpha', 'bravo']), 'alpha-bravo');
     });
 
@@ -576,18 +604,18 @@ describe('RedisStore', function() {
   describe('._parse(value)', function() {
 
     it('should not parse the value if the autoCast property is false', function() {
-      var inst = new RedisStore({ client: store.client, autoCast: false });
+      inst = new RedisStore({ client: store.client, autoCast: false });
       assert.strictEqual(inst._parse('1234'), '1234');
     });
 
     it('should not parse the value if a buffer', function() {
-      var inst = new RedisStore({ client: store.client }),
-          buffer = new Buffer(100);
+      var buffer = new Buffer(100);
+      inst = new RedisStore({ client: store.client });
       assert.strictEqual(inst._parse(buffer), buffer);
     });
 
     it('should parse string values', function() {
-      var inst = new RedisStore({ client: store.client });
+      inst = new RedisStore({ client: store.client });
       assert.strictEqual(inst._parse('1234'), 1234);
     });
 
@@ -596,18 +624,18 @@ describe('RedisStore', function() {
   describe('._stringify(value)', function() {
     
     it('should not stringify the value if the autoCast property is false', function() {
-      var inst = new RedisStore({ client: store.client, autoCast: false });
+      inst = new RedisStore({ client: store.client, autoCast: false });
       assert.strictEqual(inst._stringify(1234), 1234);
     });
 
     it('should not stringify the value if a buffer', function() {
-      var inst = new RedisStore({ client: store.client }),
-          buffer = new Buffer(100);
+      var buffer = new Buffer(100);
+      inst = new RedisStore({ client: store.client });
       assert.strictEqual(inst._stringify(buffer), buffer);
     });
 
     it('should stringify string values', function() {
-      var inst = new RedisStore({ client: store.client });
+      inst = new RedisStore({ client: store.client });
       assert.strictEqual(inst._stringify(1234), '1234');
     });
 
