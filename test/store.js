@@ -1,8 +1,9 @@
 /*global describe: true, it:true, beforeEach: true, afterEach: true, before: true, after: true */
-var assert      = require('assert'),
-    fakeredis   = require('fakeredis'),
-    client      = fakeredis.createClient(),
-    RedisStore  = require('../');
+var assert = require('assert'),
+    EventEmitter = require('events').EventEmitter,
+    fakeredis = require('fakeredis'),
+    client = fakeredis.createClient(),
+    RedisStore = require('../');
 
 describe('RedisStore', function() {
 
@@ -56,9 +57,25 @@ describe('RedisStore', function() {
     }
   };
 
-  it('should accept a custom delimiter', function() {
-    var inst = new RedisStore({ client: store.client, delimiter: '-' });
-    assert.equal(inst.delimiter, '-');
+  describe('new RedisStore(options)', function() {
+
+    it('should not require new to be constructed', function() {
+      var inst = RedisStore({ client: store.client });
+      assert.strictEqual(inst instanceof RedisStore, true);
+    });
+
+    it('should accept a custom delimiter', function() {
+      var inst = new RedisStore({ client: store.client, delimiter: '-' });
+      assert.strictEqual(inst.delimiter, '-');
+    });
+
+    it('should be an EventEmitter', function(done) {
+      var inst = new RedisStore({ client: store.client });
+      assert.strictEqual(inst instanceof EventEmitter, true);
+      inst.on('test', done);
+      inst.emit('test');
+    });
+
   });
 
   describe('.get(key, field, cb)', function() {
@@ -80,7 +97,7 @@ describe('RedisStore', function() {
     it('should return an error if the key is not defined', function(done) {
       store.get(function(err) {
         assert.ok(err instanceof Error);
-        assert.equal(err.message, 'Invalid key');
+        assert.strictEqual(err.message, 'Invalid key');
         done();
       });
     });
@@ -88,7 +105,7 @@ describe('RedisStore', function() {
     it('should return a value if a single field is specified', function(done) {
       store.get('icao', 'charlie', function(err, value) {
         assert.ok(!err);
-        assert.equal(value, 'dash dot dash dot');
+        assert.strictEqual(value, 'dash dot dash dot');
         done();
       });
     });
@@ -96,7 +113,7 @@ describe('RedisStore', function() {
     it('should accept an array for the key', function(done) {
       store.get(['icao'], 'charlie', function(err, value) {
         assert.ok(!err);
-        assert.equal(value, 'dash dot dash dot');
+        assert.strictEqual(value, 'dash dot dash dot');
         done();
       });
     });
@@ -104,7 +121,7 @@ describe('RedisStore', function() {
     it('should return null if a single field is specified but does not exist', function(done) {
       store.get('icao', 'echo', function(err, value) {
         assert.ok(!err);
-        assert.equal(value, null);
+        assert.strictEqual(value, null);
         done();
       });
     });
@@ -132,7 +149,7 @@ describe('RedisStore', function() {
         assert.ok(!err);
         assert.notStrictEqual(values, data.icao);
         assert.deepEqual(values, data.icao);
-        assert.equal(typeof values.xray, 'number');
+        assert.strictEqual(typeof values.xray, 'number');
         assert.strictEqual(values.xray, 13);
         done();
       });
@@ -141,7 +158,7 @@ describe('RedisStore', function() {
     it('should return numeric values as a number', function(done) {
       store.get('icao', 'xray', function(err, value) {
         assert.ok(!err);
-        assert.equal(typeof value, 'number');
+        assert.strictEqual(typeof value, 'number');
         assert.strictEqual(value, 13);
         done();
       });
@@ -166,7 +183,7 @@ describe('RedisStore', function() {
     it('should return an error if the key is not defined', function(done) {
       store.set(function(err) {
         assert.ok(err instanceof Error);
-        assert.equal(err.message, 'Invalid key');
+        assert.strictEqual(err.message, 'Invalid key');
         done();
       });
     });
@@ -251,7 +268,7 @@ describe('RedisStore', function() {
     it('should return an error if the pattern is not defined', function(done) {
       store.keys(function(err) {
         assert.ok(err instanceof Error);
-        assert.equal(err.message, 'Invalid pattern');
+        assert.strictEqual(err.message, 'Invalid pattern');
         done();
       });
     });
@@ -259,7 +276,7 @@ describe('RedisStore', function() {
     it('should return an error if the pattern is not a string or regular expression', function(done) {
       store.keys({}, function(err) {
         assert.ok(err instanceof Error);
-        assert.equal(err.message, 'Invalid pattern');
+        assert.strictEqual(err.message, 'Invalid pattern');
         done();
       });
     });
@@ -277,7 +294,7 @@ describe('RedisStore', function() {
       store.keys('phonetic', function(err, keys) {
         assert.ok(!err);
         assert.ok(Array.isArray(keys));
-        assert.equal(keys.length, 0);
+        assert.strictEqual(keys.length, 0);
         done();
       });
     });
@@ -303,7 +320,7 @@ describe('RedisStore', function() {
     it('should return an error if the key is not defined', function(done) {
       store.exists(function(err) {
         assert.ok(err instanceof Error);
-        assert.equal(err.message, 'Invalid key');
+        assert.strictEqual(err.message, 'Invalid key');
         done();
       });
     });
@@ -311,7 +328,7 @@ describe('RedisStore', function() {
     it('should return an error if the field is not defined', function(done) {
       store.exists('icao', function(err) {
         assert.ok(err instanceof Error);
-        assert.equal(err.message, 'Invalid field');
+        assert.strictEqual(err.message, 'Invalid field');
         done();
       });
     });
@@ -319,7 +336,7 @@ describe('RedisStore', function() {
     it('should accept an array for the key', function(done) {
       store.exists(['icao'], 'bravo', function(err, exists) {
         assert.ok(!err);
-        assert.equal(exists, true);
+        assert.strictEqual(exists, true);
         done();
       });
     });
@@ -327,7 +344,7 @@ describe('RedisStore', function() {
     it('should return true if the field exists', function(done) {
       store.exists('icao', 'bravo', function(err, exists) {
         assert.ok(!err);
-        assert.equal(exists, true);
+        assert.strictEqual(exists, true);
         done();
       });
     });
@@ -335,7 +352,7 @@ describe('RedisStore', function() {
     it('should return false if the field exists', function(done) {
       store.exists('icao', 'foxtrot', function(err, exists) {
         assert.ok(!err);
-        assert.equal(exists, false);
+        assert.strictEqual(exists, false);
         done();
       });
     });
@@ -361,7 +378,7 @@ describe('RedisStore', function() {
     it('should return an error if the key is not defined', function(done) {
       store.del(function(err) {
         assert.ok(err instanceof Error);
-        assert.equal(err.message, 'Invalid key');
+        assert.strictEqual(err.message, 'Invalid key');
         done();
       });
     });
@@ -436,7 +453,7 @@ describe('RedisStore', function() {
     it('should return an error if the key is not defined', function(done) {
       store.flush(function(err) {
         assert.ok(err instanceof Error);
-        assert.equal(err.message, 'Invalid key');
+        assert.strictEqual(err.message, 'Invalid key');
         done();
       });
     });
@@ -445,7 +462,7 @@ describe('RedisStore', function() {
       store.flush('icao', 'alpha', function(err) {
         assert.ok(!err);
         store.client.exists('icao', function(err, exists) {
-          assert.equal(exists, 0);
+          assert.strictEqual(exists, 0);
           done();
         });
       });
@@ -455,7 +472,7 @@ describe('RedisStore', function() {
       store.flush(['icao'], 'alpha', function(err) {
         assert.ok(!err);
         store.client.exists('icao', function(err, exists) {
-          assert.equal(exists, 0);
+          assert.strictEqual(exists, 0);
           done();
         });
       });
@@ -465,9 +482,9 @@ describe('RedisStore', function() {
       store.flush('icao', 'icao:more', 'echo', function(err) {
         assert.ok(!err);
         store.client.exists('icao', function(err, exists) {
-          assert.equal(exists, 0);
+          assert.strictEqual(exists, 0);
           store.client.exists('icao:more', function(err, exists) {
-            assert.equal(exists, 0);
+            assert.strictEqual(exists, 0);
             done();
           });
         });
@@ -478,9 +495,9 @@ describe('RedisStore', function() {
       store.flush(['icao', 'icao:more', 'icao'], function(err) {
         assert.ok(!err);
         store.client.exists('icao', function(err, exists) {
-          assert.equal(exists, 0);
+          assert.strictEqual(exists, 0);
           store.client.exists('icao:more', function(err, exists) {
-            assert.equal(exists, 0);
+            assert.strictEqual(exists, 0);
             done();
           });
         });
@@ -492,14 +509,14 @@ describe('RedisStore', function() {
   describe('.cacheKey(key)', function() {
     
     it('should return an array concatenated with delimiter', function() {
-      assert.equal(store.cacheKey(['alpha', 'bravo']), 'alpha:bravo');
+      assert.strictEqual(store.cacheKey(['alpha', 'bravo']), 'alpha:bravo');
       var inst = new RedisStore({ client: store.client, delimiter: '-' });
-      assert.equal(inst.cacheKey(['alpha', 'bravo']), 'alpha-bravo');
+      assert.strictEqual(inst.cacheKey(['alpha', 'bravo']), 'alpha-bravo');
     });
 
     it('should return the value if a string or number', function() {
-      assert.equal(store.cacheKey(['alpha', 'bravo']), 'alpha:bravo');
-      assert.equal(store.cacheKey(1234), 1234);
+      assert.strictEqual(store.cacheKey(['alpha', 'bravo']), 'alpha:bravo');
+      assert.strictEqual(store.cacheKey(1234), 1234);
     });
 
   });
@@ -523,7 +540,7 @@ describe('RedisStore', function() {
     it('should return an error if the key is not defined', function(done) {
       store.fields(function(err) {
         assert.ok(err instanceof Error);
-        assert.equal(err.message, 'Invalid key');
+        assert.strictEqual(err.message, 'Invalid key');
         done();
       });
     });
@@ -550,7 +567,7 @@ describe('RedisStore', function() {
       store.fields('itu', function(err, fields) {
         assert.ok(!err);
         assert.ok(Array.isArray(fields));
-        assert.equal(fields.length, 0);
+        assert.strictEqual(fields.length, 0);
         done();
       });
     });
