@@ -1,6 +1,5 @@
 /*global describe: true, it:true, beforeEach: true, afterEach: true, before: true, after: true */
 var assert      = require('assert'),
-    Buffer      = require('buffer').Buffer,
     fakeredis   = require('fakeredis'),
     client      = fakeredis.createClient(),
     RedisStore  = require('../');
@@ -184,6 +183,7 @@ describe('RedisStore', function() {
 
     it('should accept an array for the key', function(done) {
       store.set(['icao'], 'alpha', 'dot dash', function(err) {
+        assert.strictEqual(err, null);
         store.client.hgetall('icao', function(err, data) {
           assert.deepEqual(data, { alpha: 'dot dash' });
           done();
@@ -228,10 +228,14 @@ describe('RedisStore', function() {
     before(function(done) {
       var keys = Object.keys(data2),
           active = keys.length;
-      if (active === 0) return done();
+      if (active === 0) {
+        return done();
+      }
       keys.forEach(function(key) {
         store.client.hmset(key, data2[key], function() {
-          if (--active === 0) done();
+          if (--active === 0) {
+            done();
+          }
         });
       });
     });
@@ -409,10 +413,14 @@ describe('RedisStore', function() {
     beforeEach(function(done) {
       var keys = Object.keys(data2),
           active = keys.length;
-      if (active === 0) return done();
+      if (active === 0) {
+        return done();
+      }
       keys.forEach(function(key) {
         store.client.hmset(key, data2[key], function() {
-          if (--active === 0) done();
+          if (--active === 0) {
+            done();
+          }
         });
       });
     });
