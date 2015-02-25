@@ -17,7 +17,7 @@
     "redis": "^0.12.1"
   },
   "devDependencies": {
-    "fakeredis": "0.0.x",
+    "fakeredis": "^0.3.0",
     "istanbul": "^0.3.6",
     "mocha": "^2.1.0"
   },
