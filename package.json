@@ -14,7 +14,7 @@
     "redis"
   ],
   "dependencies": {
-    "redis": "^0.12.1"
+    "redis": "^2.8.0"
   },
   "devDependencies": {
     "fakeredis": "^0.3.0",
