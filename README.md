@@ -38,6 +38,6 @@ The returned store exposes the underlying Redis client through a property named 
 
 ## Running Tests
 
-`cachetree-redis` tests require [Mocha](http://visionmedia.github.com/mocha/) and can be run with either `npm test` or `make test`.  You can specify Mocha options, such as the reporter, by adding a [mocha.opts](http://visionmedia.github.com/mocha/#mocha.opts) file, which is ignored by git, to the `test` directory.
+`cachetree-redis` tests require [Mocha](https://mochajs.org/) and can be run with either `npm test` or `make test`.  You can specify Mocha options, such as the reporter, by adding a [mocha.opts](https://mochajs.org/#mochaopts) file, which is ignored by git, to the `test` directory.
 
 By default, the test suite uses [fakeredis](https://npmjs.org/package/fakeredis) to mock a Redis server.  To run the tests against an actual Redis server, add a JSON file named `options.json` to the `test` directory. This file should contain the options to be passed to the `cachetree-redis` constructor function.  Like the `mocha.opts` file, `options.json` is ignored by git.
